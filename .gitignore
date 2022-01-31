@@ -1,10 +1,18 @@
+# les miens
+old/
+*.geany
+*.project
+.buildozer/
+mon_env/
+*.mp4
+bin/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
 
 # Distribution / packaging
 .Python
@@ -127,3 +135,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/.project
