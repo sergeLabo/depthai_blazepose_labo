@@ -1,4 +1,8 @@
 
+from time import time
+
+from oscpy.client import OSCClient
+
 from BlazeposeDepthaiEdge import BlazeposeDepthai
 from BlazeposeRenderer import BlazeposeRenderer
 
@@ -115,24 +119,38 @@ def get_config():
 def main():
     config = get_config()
 
-    tracker = BlazeposeDepthai(**config)
-    renderer = BlazeposeRenderer(tracker, **config)
+    address = "127.0.0.1"
+    port = 8000
+    osc = OSCClient(address, port)
 
+    tracker = BlazeposeDepthai(**config)
+    # # renderer = BlazeposeRenderer(tracker, **config)
+    t = time()
+    n = 0
     while True:
         # Run blazepose on next frame
         frame, body = tracker.next_frame()
 
-        if body:
-            print("Depth:", int(body.xyz[2]))
+        if time() - t > 1:
+            t = time()
+            print(n)
+            n = 0
 
-        if frame is None:
-            break
+        if body:
+            if body.xyz.any():
+                d = int(body.xyz[2])
+                osc.send_message(b'/depth', [d])
+                print("Depth:", d)
+        n += 1
+
+        # # if frame is None:
+            # # break
 
         # Draw 2d skeleton
-        frame = renderer.draw(frame, body)
-        key = renderer.waitKey(delay=1)
-        if key == 27 or key == ord('q'):
-            break
+        # # frame = renderer.draw(frame, body)
+        # # key = renderer.waitKey(delay=1)
+        # # if key == 27 or key == ord('q'):
+            # # break
 
     renderer.exit()
     tracker.exit()

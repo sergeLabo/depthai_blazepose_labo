@@ -32,6 +32,7 @@ class FPS:
         self.nbf+=1
 
     def get(self):
+        print(f"FPS={self.get():.1f}")
         return self.fps
 
     def get_global(self):
