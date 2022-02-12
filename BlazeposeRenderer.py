@@ -78,6 +78,8 @@ class BlazeposeRenderer:
                                             tracker.video_fps,
                                             (tracker.img_w, tracker.img_h))
 
+        cv2.namedWindow('Blazepose', cv2.WND_PROP_FULLSCREEN)
+
     def is_present(self, body, lm_id):
         return body.presence[lm_id] > self.tracker.presence_threshold
 
@@ -182,7 +184,7 @@ class BlazeposeRenderer:
     def waitKey(self, delay=1):
         if self.show_fps:
             self.tracker.fps.draw(self.frame, orig=(50,50), size=1, color=(240,180,100))
-        cv2.imshow("Blazepose", self.frame)
+        cv2.imshow('Blazepose', self.frame)
         if self.output:
             self.output.write(self.frame)
         key = cv2.waitKey(delay)

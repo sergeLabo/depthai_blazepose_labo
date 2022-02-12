@@ -82,7 +82,7 @@ class GrandeEchelleViewer:
             if ret:
                 if self.info:
                     img = self.draw_text(img, self.frame_nbr)
-                    print(self.frame_nbr)
+                    # # print(self.frame_nbr)
                 cv2.imshow('histopocene', img)
 
             k = cv2.waitKey(10)
@@ -114,6 +114,15 @@ class GrandeEchelle(GrandeEchelleViewer):
         # Fenêtres OpenCV
         GrandeEchelleViewer.__init__(self, config)
 
+
+        osc = OSCThreadServer()
+        sock = osc.listen(address='127.0.0.1', port=8000, default=True)
+        @osc.address(b'/depth')
+        def callback(*values):
+            depth = int(values[0])
+            # # print(f"depth: {depth}")
+            self.get_frame(depth)
+
         self.frame_nbr = 0
         self.last_time = time()
         self.raz = int(self.config['histopocene']['raz'])
@@ -129,22 +138,13 @@ class GrandeEchelle(GrandeEchelleViewer):
         self.largeur_maxi = int(self.config['histopocene']['largeur_maxi'])
         self.pile_size = int(self.config['histopocene']['pile_size'])
         self.lissage = int(self.config['histopocene']['lissage'])
-
+        print("self.lissage", self.lissage)
         self.depth = 1
         self.histo = [self.profondeur_mini + 1000]*self.pile_size
 
         # Stockage des 8 dernières valeurs de frame
         self.slow_size = int(self.config['histopocene']['slow_size'])
         self.histo_slow = [0]*self.slow_size
-
-        osc = OSCThreadServer()
-        sock = osc.listen(address='127.0.0.1', port=8000, default=True)
-
-        @osc.address(b'/depth')
-        def callback(*values):
-            depth = int(values[0])
-            print(f"depth: {depth}")
-            self.get_frame(depth)
 
     def get_frame(self, depth):
         """ Appelé à chaque réception de depth dans receive 'depth',
@@ -153,7 +153,7 @@ class GrandeEchelle(GrandeEchelleViewer):
         39750 frame pour 300 cm
         1 cm pour 132 frames
         """
-        print("depth", depth)
+        # # print("depth", depth)
         # Mise à jour de la pile
         self.histo.append(depth)
         del self.histo[0]
@@ -174,7 +174,7 @@ class GrandeEchelle(GrandeEchelleViewer):
         # (x1, y1, x2, y2) = (mini, 0, maxi, lenght)
         a, b = get_a_b(mini, lenght, maxi, 0)
         frame = int(a*depth + b)
-
+        print("frame", frame)
         # Pour ne jamais planté
         if frame < 0:
             frame = 0

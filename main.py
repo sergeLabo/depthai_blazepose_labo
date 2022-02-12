@@ -7,7 +7,6 @@ from BlazeposeDepthaiEdge import BlazeposeDepthai
 from BlazeposeRenderer import BlazeposeRenderer
 
 
-
 def get_config():
     """
     Blazepose body pose detector
@@ -79,16 +78,15 @@ def get_config():
         boolean, force person detection on every frame (never use landmarks from
         previous frame to determine ROI)
 
-    BlazeposeRenderer
+    BlazeposeRenderer Affichage 2D
+    Arguments:
     -show_3d
         choices = [None, "image", "world", "mixed"]
         Display skeleton in 3d in a separate window. See README for description
     - output
         Path to output video file
     """
-
     config = {}
-
 
     # Blazepose
     config['edge'] = True
@@ -110,6 +108,7 @@ def get_config():
     config['force_detection'] = False
 
     # Renderer
+    config['renderer'] = 1
     config['show_3d'] = None
     config['output'] = None
 
@@ -124,7 +123,10 @@ def main():
     osc = OSCClient(address, port)
 
     tracker = BlazeposeDepthai(**config)
-    # # renderer = BlazeposeRenderer(tracker, **config)
+
+    if config['renderer']:
+        renderer = BlazeposeRenderer(tracker, **config)
+
     t = time()
     n = 0
     while True:
@@ -133,24 +135,26 @@ def main():
 
         if time() - t > 1:
             t = time()
-            print(n)
+            # # print(n)
             n = 0
 
-        if body:
-            if body.xyz.any():
-                d = int(body.xyz[2])
-                osc.send_message(b'/depth', [d])
-                print("Depth:", d)
+        try:
+            d = int(body.xyz[2])
+            osc.send_message(b'/depth', [d])
+            # # print("Depth:", d)
+        except:
+            pass
         n += 1
 
-        # # if frame is None:
-            # # break
+        if config['renderer']:
+            if frame is None:
+                break
 
-        # Draw 2d skeleton
-        # # frame = renderer.draw(frame, body)
-        # # key = renderer.waitKey(delay=1)
-        # # if key == 27 or key == ord('q'):
-            # # break
+            # # # Draw 2d skeleton
+            frame = renderer.draw(frame, body)
+            key = renderer.waitKey(delay=10)
+            if key == 27:
+                break
 
     renderer.exit()
     tracker.exit()
