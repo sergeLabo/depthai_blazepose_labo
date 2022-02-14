@@ -6,7 +6,7 @@ old/
 mon_env/
 *.mp4
 bin/
-
+*.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
